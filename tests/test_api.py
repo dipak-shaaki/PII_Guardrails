@@ -1,4 +1,3 @@
-import re
 from contextlib import asynccontextmanager
 
 from httpx import ASGITransport, AsyncClient
@@ -86,14 +85,18 @@ async def api(items, expose_token_map=True):
     app = create_app(use_lifespan=False)
     store, provider = FakeStore(), ScriptedProvider(items)
     app.state.settings = Settings(
-        groq_api_key="t", gemini_api_key="t", encryption_key="t",
+        groq_api_key="t",
+        gemini_api_key="t",
+        encryption_key="t",
         expose_token_map=expose_token_map,
     )
     app.state.store = store
     app.state.agent = PIIAgent(
         PIIShield(StubDetector(KNOWN)), provider, ToolRegistry(), max_tool_rounds=3
     )
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+    async with AsyncClient(
+        transport=ASGITransport(app=app), base_url="http://test"
+    ) as client:
         yield client, store, provider
 
 
@@ -113,16 +116,23 @@ async def test_chat_returns_all_three_views_and_stores_tokens_only():
 
 
 async def test_session_continues_across_turns():
-    async with api([reply("Hello <PERSON_1>!"), reply("Welcome back")]) as (client, _, provider):
+    async with api([reply("Hello <PERSON_1>!"), reply("Welcome back")]) as (
+        client,
+        _,
+        provider,
+    ):
         first = (await client.post("/chat", json={"message": "I'm Dipak"})).json()
         second = (
             await client.post(
-                "/chat", json={"message": "Dipak again", "session_id": first["session_id"]}
+                "/chat",
+                json={"message": "Dipak again", "session_id": first["session_id"]},
             )
         ).json()
 
         assert second["llm_query"] == "<PERSON_1> again"  # token reused
-        assert any(m.content == "I'm <PERSON_1>" for m in provider.seen[1])  # history sent
+        assert any(
+            m.content == "I'm <PERSON_1>" for m in provider.seen[1]
+        )  # history sent
 
 
 async def test_server_generates_a_valid_session_id():
@@ -168,7 +178,9 @@ async def test_message_validation():
     async with api([]) as (client, _, _):
         assert (await client.post("/chat", json={"message": ""})).status_code == 422
         assert (await client.post("/chat", json={"message": "   "})).status_code == 422
-        assert (await client.post("/chat", json={"message": "x" * 4001})).status_code == 422
+        assert (
+            await client.post("/chat", json={"message": "x" * 4001})
+        ).status_code == 422
 
 
 async def test_invalid_session_id_returns_422():
@@ -179,7 +191,9 @@ async def test_invalid_session_id_returns_422():
 
 async def test_get_session_view_and_404():
     async with api([reply("Hello <PERSON_1>!")]) as (client, _, _):
-        sid = (await client.post("/chat", json={"message": "I'm Dipak"})).json()["session_id"]
+        sid = (await client.post("/chat", json={"message": "I'm Dipak"})).json()[
+            "session_id"
+        ]
         r = await client.get(f"/sessions/{sid}")
         body = r.json()
         assert r.status_code == 200
@@ -198,7 +212,9 @@ async def test_token_map_hidden_unless_enabled():
 
 async def test_delete_session():
     async with api([reply("hi")]) as (client, store, _):
-        sid = (await client.post("/chat", json={"message": "hello"})).json()["session_id"]
+        sid = (await client.post("/chat", json={"message": "hello"})).json()[
+            "session_id"
+        ]
         assert (await client.delete(f"/sessions/{sid}")).json() == {"deleted": True}
         assert (await client.delete(f"/sessions/{sid}")).json() == {"deleted": False}
         assert store.sessions == {}

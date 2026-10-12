@@ -22,7 +22,9 @@ class Tool:
 
     @property
     def spec(self) -> ToolSpec:
-        return ToolSpec(self.name, self.description, self.args_model.model_json_schema())
+        return ToolSpec(
+            self.name, self.description, self.args_model.model_json_schema()
+        )
 
 
 class ToolRegistry:

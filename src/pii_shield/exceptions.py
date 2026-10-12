@@ -4,14 +4,16 @@ class PIIShieldError(Exception):
 
 class DetectionError(PIIShieldError):
     """Raised when PII detection fails on a given input."""
-    
+
+
 class InputBlockedError(PIIShieldError):
     """Input contained a type of PII that must never be processed."""
 
     def __init__(self, entity_types: list[str]) -> None:
         self.entity_types = tuple(entity_types)
         super().__init__(f"Input blocked: contains {', '.join(entity_types)}")
-        
+
+
 class ProviderError(PIIShieldError):
     def __init__(self, provider: str, message: str) -> None:
         self.provider = provider
@@ -29,10 +31,15 @@ class ProviderRequestError(ProviderError):
 class AllProvidersFailedError(PIIShieldError):
     def __init__(self, failures: list[ProviderError]) -> None:
         self.failures = tuple(failures)
-        super().__init__("All LLM providers failed: " + "; ".join(str(f) for f in failures))   
+        super().__init__(
+            "All LLM providers failed: " + "; ".join(str(f) for f in failures)
+        )
+
+
 class ToolError(PIIShieldError):
     """A tool call failed. The message is safe to show to the LLM (no input values)."""
-    
+
+
 class SessionStoreError(PIIShieldError):
     """Redis is unreachable or session data is unreadable. Callers should fail closed."""
 
@@ -43,6 +50,7 @@ class SessionBusyError(PIIShieldError):
 
 class InvalidSessionIdError(PIIShieldError):
     """Session id has an unsafe format."""
+
 
 class SessionNotFoundError(PIIShieldError):
     """No session exists for this id (never created, or expired)."""

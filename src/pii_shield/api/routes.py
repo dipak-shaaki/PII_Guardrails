@@ -60,13 +60,18 @@ async def chat(
         llm_reply=result.llm_reply,
         blocked=result.blocked,
         provider=result.provider,
-        trace=[TraceEventOut(kind=e.kind, name=e.name, content=e.content) for e in result.trace],
+        trace=[
+            TraceEventOut(kind=e.kind, name=e.name, content=e.content)
+            for e in result.trace
+        ],
         token_map=session.vault.token_to_value if settings.expose_token_map else None,
     )
 
 
 @router.get("/sessions/{session_id}", response_model=SessionView)
-async def get_session(session_id: str, store: StoreDep, settings: SettingsDep) -> SessionView:
+async def get_session(
+    session_id: str, store: StoreDep, settings: SettingsDep
+) -> SessionView:
     session = await store.load(session_id)
     if not session.history and not session.vault.token_to_value:
         raise SessionNotFoundError()
@@ -76,7 +81,10 @@ async def get_session(session_id: str, store: StoreDep, settings: SettingsDep) -
             MessageView(
                 role=m.role,
                 content=m.content,
-                tool_calls=[ToolCallView(name=c.name, arguments=c.arguments) for c in m.tool_calls],
+                tool_calls=[
+                    ToolCallView(name=c.name, arguments=c.arguments)
+                    for c in m.tool_calls
+                ],
             )
             for m in session.history
         ],

@@ -15,4 +15,10 @@ def build_provider(settings: Settings) -> LLMProvider:
     )
 
 
-__all__ = ["LLMProvider", "LLMResponse", "Message", "FallbackProvider", "build_provider"]
+__all__ = [
+    "FallbackProvider",
+    "LLMProvider",
+    "LLMResponse",
+    "Message",
+    "build_provider",
+]

@@ -5,7 +5,10 @@ from pydantic import BaseModel, Field, StringConstraints
 MAX_MESSAGE_CHARS = 4000  # bounds spaCy/LLM cost per request
 
 UserText = Annotated[
-    str, StringConstraints(strip_whitespace=True, min_length=1, max_length=MAX_MESSAGE_CHARS)
+    str,
+    StringConstraints(
+        strip_whitespace=True, min_length=1, max_length=MAX_MESSAGE_CHARS
+    ),
 ]
 
 

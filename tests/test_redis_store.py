@@ -137,7 +137,9 @@ async def test_key_rotation(redis_client, prefix):
     assert (await new_only.load(SID)).vault.token_to_value == vault.token_to_value
 
 
-@pytest.mark.parametrize("bad_id", ["short", "has space here", "../../etc/passwd", "a" * 65, ""])
+@pytest.mark.parametrize(
+    "bad_id", ["short", "has space here", "../../etc/passwd", "a" * 65, ""]
+)
 async def test_unsafe_session_ids_rejected(store, bad_id):
     with pytest.raises(InvalidSessionIdError):
         await store.load(bad_id)

@@ -20,7 +20,9 @@ class InputGuard:
         self._blocked = frozenset(blocked_types)
 
     def check(self, entities: Sequence[DetectedEntity]) -> None:
-        hits = sorted({e.entity_type for e in entities if e.entity_type in self._blocked})
+        hits = sorted(
+            {e.entity_type for e in entities if e.entity_type in self._blocked}
+        )
         if hits:
             logger.warning("Blocked input containing: %s", ", ".join(hits))
             raise InputBlockedError(hits)
@@ -52,7 +54,9 @@ class OutputGuard:
         leaks = [
             e
             for e in entities
-            if not any(e.start < t_end and e.end > t_start for t_start, t_end in token_spans)
+            if not any(
+                e.start < t_end and e.end > t_start for t_start, t_end in token_spans
+            )
         ]
         if not leaks:
             return OutputScan(text=text, leaks_found=0)

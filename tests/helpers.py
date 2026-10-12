@@ -12,6 +12,8 @@ class StubDetector:
         for value, etype in self.known.items():
             start = text.find(value)
             while start != -1:
-                found.append(DetectedEntity(etype, start, start + len(value), 0.9, value))
+                found.append(
+                    DetectedEntity(etype, start, start + len(value), 0.9, value)
+                )
                 start = text.find(value, start + len(value))
         return sorted(found, key=lambda e: e.start)

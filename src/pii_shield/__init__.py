@@ -1,4 +1,3 @@
-
 from pii_shield.core.vault import TokenVault
 from pii_shield.exceptions import (
     DetectionError,

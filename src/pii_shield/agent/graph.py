@@ -111,7 +111,9 @@ class PIIAgent:
     async def _scan(self, text: str, vault: TokenVault) -> OutputScan:
         return await asyncio.to_thread(self._shield.sanitize_output, text, vault)
 
-    async def _tokenize_args(self, args: dict[str, Any], vault: TokenVault) -> dict[str, Any]:
+    async def _tokenize_args(
+        self, args: dict[str, Any], vault: TokenVault
+    ) -> dict[str, Any]:
         # Real PII the model invents in tool arguments must not reach history.
         return await asyncio.to_thread(
             map_strings, args, lambda s: self._shield.sanitize_output(s, vault).text
@@ -126,7 +128,11 @@ class PIIAgent:
             )
         except InputBlockedError:
             # Stop here: nothing is stored, nothing reaches the LLM.
-            return {"blocked": True, "reply": BLOCKED_REPLY, "display_reply": BLOCKED_REPLY}
+            return {
+                "blocked": True,
+                "reply": BLOCKED_REPLY,
+                "display_reply": BLOCKED_REPLY,
+            }
         return {
             "history": [*state["history"], Message("user", safe.llm_query)],
             "llm_query": safe.llm_query,
@@ -140,15 +146,25 @@ class PIIAgent:
 
         if response.tool_calls and state["tool_rounds"] >= self._max_tool_rounds:
             logger.warning("Tool round limit reached")
-            return {"reply": LIMIT_REPLY, "pending_calls": (), "provider": response.provider}
+            return {
+                "reply": LIMIT_REPLY,
+                "pending_calls": (),
+                "provider": response.provider,
+            }
 
         if not response.tool_calls:
-            return {"reply": response.text, "pending_calls": (), "provider": response.provider}
+            return {
+                "reply": response.text,
+                "pending_calls": (),
+                "provider": response.provider,
+            }
 
         content = (await self._scan(response.text, vault)).text if response.text else ""
         calls = []
         for c in response.tool_calls:
-            calls.append(ToolCall(c.id, c.name, await self._tokenize_args(c.arguments, vault)))
+            calls.append(
+                ToolCall(c.id, c.name, await self._tokenize_args(c.arguments, vault))
+            )
         return {
             "history": [
                 *state["history"],
@@ -169,7 +185,9 @@ class PIIAgent:
             # The ONLY place real values come back, and they never go to the LLM.
             real_args = map_strings(call.arguments, vault.restore)
             if has_unresolved_token(real_args):
-                result = json.dumps({"error": "arguments contain an unknown placeholder"})
+                result = json.dumps(
+                    {"error": "arguments contain an unknown placeholder"}
+                )
             else:
                 try:
                     result = await self._tools.execute(call.name, real_args)

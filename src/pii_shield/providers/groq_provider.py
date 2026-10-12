@@ -94,14 +94,18 @@ class GroqProvider(LLMProvider):
 
         message = resp.choices[0].message if resp.choices else None
         text = message.content if message else None
-        calls = tuple(
-            ToolCall(
-                id=c.id,
-                name=c.function.name,
-                arguments=json.loads(c.function.arguments or "{}"),
+        calls = (
+            tuple(
+                ToolCall(
+                    id=c.id,
+                    name=c.function.name,
+                    arguments=json.loads(c.function.arguments or "{}"),
+                )
+                for c in (message.tool_calls or ())
             )
-            for c in (message.tool_calls or ())
-        ) if message else ()
+            if message
+            else ()
+        )
         if not text and not calls:
             raise ProviderUnavailableError(self.name, "empty response")
         return LLMResponse(

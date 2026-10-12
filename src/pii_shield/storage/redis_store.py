@@ -56,7 +56,7 @@ class SessionStore:
         self._prefix = prefix
 
     @classmethod
-    def from_settings(cls, settings: Settings) -> "SessionStore":
+    def from_settings(cls, settings: Settings) -> SessionStore:
         client = Redis.from_url(settings.redis_url, decode_responses=True)
         return cls(
             client, settings.encryption_key, ttl_seconds=settings.session_ttl_seconds
@@ -65,7 +65,9 @@ class SessionStore:
     def _key(self, session_id: str) -> str:
         # Strict allow-list: the id ends up inside a Redis key.
         if not SESSION_ID_PATTERN.fullmatch(session_id):
-            raise InvalidSessionIdError("session id must be 8-64 chars of A-Z a-z 0-9 _ -")
+            raise InvalidSessionIdError(
+                "session id must be 8-64 chars of A-Z a-z 0-9 _ -"
+            )
         return f"{self._prefix}session:{session_id}"
 
     async def load(self, session_id: str) -> SessionData:
@@ -84,9 +86,7 @@ class SessionStore:
             return SessionData(vault=TokenVault(), history=[])
 
         try:
-            vault = TokenVault.from_dict(
-                json.loads(self._fernet.decrypt(raw["vault"]))
-            )
+            vault = TokenVault.from_dict(json.loads(self._fernet.decrypt(raw["vault"])))
             history = [message_from_dict(m) for m in json.loads(raw["history"])]
         except (InvalidToken, KeyError, TypeError, ValueError) as exc:
             # Log the type only: never include payloads.
@@ -99,7 +99,9 @@ class SessionStore:
     ) -> None:
         key = self._key(session_id)
         payload = {
-            "vault": self._fernet.encrypt(json.dumps(vault.to_dict()).encode()).decode(),
+            "vault": self._fernet.encrypt(
+                json.dumps(vault.to_dict()).encode()
+            ).decode(),
             "history": json.dumps([message_to_dict(m) for m in history]),
         }
         try:
