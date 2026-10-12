@@ -27,6 +27,8 @@ class Settings(BaseSettings):
     
     encryption_key: str  # one or more comma-separated Fernet keys (first one encrypts)
     session_ttl_seconds: int = 3600
+    
+    expose_token_map: bool = False  # demo only: returns token->real value map in API responses
 
 
 @lru_cache
