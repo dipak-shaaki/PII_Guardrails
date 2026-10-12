@@ -19,6 +19,7 @@ dependencies = [
     "pydantic-settings>=2.15.0",
     "redis>=8.1.0",
     "spacy>=3.8.16",
+    "uvicorn>=0.54.0",
 ]
 
 [project.scripts]
