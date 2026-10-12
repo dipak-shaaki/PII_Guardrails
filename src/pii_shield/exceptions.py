@@ -29,4 +29,6 @@ class ProviderRequestError(ProviderError):
 class AllProvidersFailedError(PIIShieldError):
     def __init__(self, failures: list[ProviderError]) -> None:
         self.failures = tuple(failures)
-        super().__init__("All LLM providers failed: " + "; ".join(str(f) for f in failures))
+        super().__init__("All LLM providers failed: " + "; ".join(str(f) for f in failures))   
+class ToolError(PIIShieldError):
+    """A tool call failed. The message is safe to show to the LLM (no input values)."""

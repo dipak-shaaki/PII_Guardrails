@@ -2,7 +2,7 @@ import logging
 from collections.abc import Sequence
 
 from pii_shield.exceptions import AllProvidersFailedError, ProviderUnavailableError
-from pii_shield.providers.base import LLMProvider, LLMResponse, Message
+from pii_shield.providers.base import LLMProvider, LLMResponse, Message, ToolSpec
 
 logger = logging.getLogger(__name__)
 
@@ -17,11 +17,13 @@ class FallbackProvider(LLMProvider):
             raise ValueError("FallbackProvider needs at least one provider")
         self._providers = tuple(providers)
 
-    async def generate(self, messages: Sequence[Message]) -> LLMResponse:
+    async def generate(
+        self, messages: Sequence[Message], tools: Sequence[ToolSpec] | None = None
+    ) -> LLMResponse:
         failures: list[ProviderUnavailableError] = []
         for provider in self._providers:
             try:
-                response = await provider.generate(messages)
+                response = await provider.generate(messages, tools)
             except ProviderUnavailableError as exc:
                 logger.warning("Provider unavailable (%s); trying next", exc)
                 failures.append(exc)

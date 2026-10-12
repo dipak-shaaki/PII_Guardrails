@@ -9,8 +9,8 @@ class Settings(BaseSettings):
     # LLM providers
     groq_api_key: str
     gemini_api_key: str
-    groq_model: str = "llama-3.3-70b-versatile"
-    gemini_model: str = "gemini-2.0-flash"
+    groq_model: str = "openai/gpt-oss-120b"
+    gemini_model: str = "gemini-flash-lite-latest"
 
     # NLP / PII detection
     spacy_model: str = "en_core_web_lg"
@@ -22,6 +22,8 @@ class Settings(BaseSettings):
     # App
     environment: str = "development"
     log_level: str = "INFO"
+    
+    agent_max_tool_rounds: int = 5
 
 
 @lru_cache
