@@ -42,8 +42,7 @@ class Tokenizer:
             return TokenizedText(text=text, entities=())
 
         # Assign tokens left to right so numbering follows order of appearance...
-        tokens = [vault.get_or_create_token(e.entity_type, e.value) for e in entities]
-
+        tokens = [vault.get_or_create_token(e.entity_type, e.text) for e in entities]
         # ...but replace right to left so earlier offsets stay valid.
         out = text
         for entity, token in sorted(zip(entities, tokens), key=lambda p: -p[0].start):
