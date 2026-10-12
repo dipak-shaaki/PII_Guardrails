@@ -2,7 +2,7 @@ import logging
 from collections.abc import Iterable
 
 from phonenumbers import Leniency, PhoneNumberMatcher
-from presidio_analyzer import EntityRecognizer, RecognizerResult, RecognizerRegistry
+from presidio_analyzer import EntityRecognizer, RecognizerRegistry, RecognizerResult
 from presidio_analyzer.nlp_engine import NlpArtifacts
 
 logger = logging.getLogger(__name__)

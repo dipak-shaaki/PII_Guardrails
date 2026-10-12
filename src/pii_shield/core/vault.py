@@ -45,7 +45,7 @@ class TokenVault:
         return {"token_to_value": self.token_to_value, "counters": self.counters}
 
     @classmethod
-    def from_dict(cls, data: dict) -> "TokenVault":
+    def from_dict(cls, data: dict) -> TokenVault:
         vault = cls(
             token_to_value=dict(data.get("token_to_value", {})),
             counters=dict(data.get("counters", {})),

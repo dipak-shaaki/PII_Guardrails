@@ -71,7 +71,7 @@ class Detector:
         )
 
     @classmethod
-    def from_settings(cls, settings: Settings | None = None) -> "Detector":
+    def from_settings(cls, settings: Settings | None = None) -> Detector:
         settings = settings or get_settings()
         return cls(
             spacy_model=settings.spacy_model,
