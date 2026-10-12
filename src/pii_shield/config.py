@@ -28,7 +28,6 @@ class Settings(BaseSettings):
 
     agent_max_tool_rounds: int = 5
 
-    encryption_key: str  # one or more comma-separated Fernet keys (first one encrypts)
     session_ttl_seconds: int = 3600
 
     expose_token_map: bool = (
