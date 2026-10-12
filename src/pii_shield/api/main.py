@@ -19,6 +19,18 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     settings = get_settings()
+    missing = [
+        name
+        for name, value in {
+            "GROQ_API_KEY": settings.groq_api_key,
+            "GEMINI_API_KEY": settings.gemini_api_key,
+            "ENCRYPTION_KEY": settings.encryption_key,
+        }.items()
+        if not value
+    ]
+    if missing:
+        raise RuntimeError(f"Missing required settings: {', '.join(missing)}")
+    
     logging.basicConfig(
         level=settings.log_level,
         format="%(asctime)s %(levelname)s %(name)s: %(message)s",
