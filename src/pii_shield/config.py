@@ -9,8 +9,9 @@ class Settings(BaseSettings):
     )
 
     # LLM providers
-    groq_api_key: str
-    gemini_api_key: str
+    groq_api_key: str = ""
+    gemini_api_key: str = ""
+    encryption_key: str = ""
     groq_model: str = "openai/gpt-oss-120b"
     gemini_model: str = "gemini-flash-lite-latest"
 
