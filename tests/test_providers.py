@@ -16,7 +16,7 @@ class FakeProvider(LLMProvider):
         self.error = error
         self.calls = 0
 
-    async def generate(self, messages):
+    async def generate(self, messages, tools=None):
         self.calls += 1
         if self.error:
             raise self.error
