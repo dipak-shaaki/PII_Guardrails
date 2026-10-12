@@ -96,7 +96,10 @@ async def test_credit_card_never_reaches_llm_or_history():
 
 async def test_unresolved_placeholder_does_not_run_the_tool():
     agent, provider, received = make_agent(
-        [wants(to_email="<EMAIL_ADDRESS_9>", body="hi"), reply("Sorry, I need your email.")]
+        [
+            wants(to_email="<EMAIL_ADDRESS_9>", body="hi"),
+            reply("Sorry, I need your email."),
+        ]
     )
     result = await agent.run("hello", TokenVault())
     assert received == []
@@ -105,7 +108,9 @@ async def test_unresolved_placeholder_does_not_run_the_tool():
 
 
 async def test_invalid_arguments_are_reported_not_raised():
-    agent, provider, received = make_agent([wants(wrong_field=1), reply("Let me retry.")])
+    agent, provider, received = make_agent(
+        [wants(wrong_field=1), reply("Let me retry.")]
+    )
     await agent.run("hello", TokenVault())
     assert received == []
     assert "invalid arguments" in provider.seen[1][-1].content
@@ -113,7 +118,10 @@ async def test_invalid_arguments_are_reported_not_raised():
 
 async def test_tool_round_limit_ends_the_loop_cleanly():
     agent, _, received = make_agent(
-        [wants(to_email="<EMAIL_ADDRESS_1>", body="a"), wants(to_email="<EMAIL_ADDRESS_1>", body="b")],
+        [
+            wants(to_email="<EMAIL_ADDRESS_1>", body="a"),
+            wants(to_email="<EMAIL_ADDRESS_1>", body="b"),
+        ],
         max_rounds=1,
     )
     result = await agent.run("email me at dipak@example.com", TokenVault())

@@ -40,12 +40,16 @@ def _to_contents(messages: Sequence[Message]) -> list[types.Content]:
         if m.role == "assistant":
             parts = [types.Part(text=m.content)] if m.content else []
             parts += [
-                types.Part(function_call=types.FunctionCall(name=c.name, args=c.arguments))
+                types.Part(
+                    function_call=types.FunctionCall(name=c.name, args=c.arguments)
+                )
                 for c in m.tool_calls
             ]
             contents.append(types.Content(role="model", parts=parts))
         else:
-            contents.append(types.Content(role="user", parts=[types.Part(text=m.content)]))
+            contents.append(
+                types.Content(role="user", parts=[types.Part(text=m.content)])
+            )
     return contents
 
 
@@ -88,7 +92,9 @@ class GeminiProvider(LLMProvider):
                 ),
             )
         except errors.ServerError as exc:
-            raise ProviderUnavailableError(self.name, f"server error {exc.code}") from exc
+            raise ProviderUnavailableError(
+                self.name, f"server error {exc.code}"
+            ) from exc
         except errors.ClientError as exc:
             if exc.code == 429:
                 raise ProviderUnavailableError(self.name, "rate limited") from exc
@@ -97,7 +103,9 @@ class GeminiProvider(LLMProvider):
             raise ProviderUnavailableError(self.name, type(exc).__name__) from exc
 
         candidate = resp.candidates[0] if resp.candidates else None
-        parts = (candidate.content.parts or []) if candidate and candidate.content else []
+        parts = (
+            (candidate.content.parts or []) if candidate and candidate.content else []
+        )
 
         text = "".join(p.text for p in parts if p.text and not p.thought)
         calls = tuple(
@@ -111,4 +119,6 @@ class GeminiProvider(LLMProvider):
         )
         if not text and not calls:
             raise ProviderUnavailableError(self.name, "empty response")
-        return LLMResponse(text=text, provider=self.name, model=self._model, tool_calls=calls)
+        return LLMResponse(
+            text=text, provider=self.name, model=self._model, tool_calls=calls
+        )

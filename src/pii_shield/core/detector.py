@@ -48,7 +48,9 @@ class Detector:
         ).create_engine()
 
         registry = RecognizerRegistry(supported_languages=[language])
-        registry.load_predefined_recognizers(nlp_engine=nlp_engine, languages=[language])
+        registry.load_predefined_recognizers(
+            nlp_engine=nlp_engine, languages=[language]
+        )
         register_custom_recognizers(registry)
 
         self._analyzer = AnalyzerEngine(

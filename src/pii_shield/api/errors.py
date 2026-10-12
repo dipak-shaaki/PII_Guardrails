@@ -40,9 +40,20 @@ def register_error_handlers(app: FastAPI) -> None:
     _register(app, SessionBusyError, 409, "This session is busy. Try again shortly.")
     _register(app, SessionStoreError, 503, "Session storage is unavailable.", E)
     _register(
-        app, DetectionError, 503,
-        "The safety check is unavailable, so your message was not processed.", E,
+        app,
+        DetectionError,
+        503,
+        "The safety check is unavailable, so your message was not processed.",
+        E,
     )
-    _register(app, AllProvidersFailedError, 503, "The language model is temporarily unavailable.", E)
-    _register(app, ProviderRequestError, 502, "The language model request was rejected.", E)
+    _register(
+        app,
+        AllProvidersFailedError,
+        503,
+        "The language model is temporarily unavailable.",
+        E,
+    )
+    _register(
+        app, ProviderRequestError, 502, "The language model request was rejected.", E
+    )
     _register(app, PIIShieldError, 500, "Internal error.", E)

@@ -4,7 +4,9 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
+    model_config = SettingsConfigDict(
+        env_file=".env", env_file_encoding="utf-8", extra="ignore"
+    )
 
     # LLM providers
     groq_api_key: str
@@ -22,13 +24,15 @@ class Settings(BaseSettings):
     # App
     environment: str = "development"
     log_level: str = "INFO"
-    
+
     agent_max_tool_rounds: int = 5
-    
+
     encryption_key: str  # one or more comma-separated Fernet keys (first one encrypts)
     session_ttl_seconds: int = 3600
-    
-    expose_token_map: bool = False  # demo only: returns token->real value map in API responses
+
+    expose_token_map: bool = (
+        False  # demo only: returns token->real value map in API responses
+    )
 
 
 @lru_cache
