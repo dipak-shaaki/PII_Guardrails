@@ -43,3 +43,6 @@ class SessionBusyError(PIIShieldError):
 
 class InvalidSessionIdError(PIIShieldError):
     """Session id has an unsafe format."""
+
+class SessionNotFoundError(PIIShieldError):
+    """No session exists for this id (never created, or expired)."""
