@@ -32,3 +32,14 @@ class AllProvidersFailedError(PIIShieldError):
         super().__init__("All LLM providers failed: " + "; ".join(str(f) for f in failures))   
 class ToolError(PIIShieldError):
     """A tool call failed. The message is safe to show to the LLM (no input values)."""
+    
+class SessionStoreError(PIIShieldError):
+    """Redis is unreachable or session data is unreadable. Callers should fail closed."""
+
+
+class SessionBusyError(PIIShieldError):
+    """Another request is already working on this session."""
+
+
+class InvalidSessionIdError(PIIShieldError):
+    """Session id has an unsafe format."""

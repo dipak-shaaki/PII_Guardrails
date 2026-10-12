@@ -8,6 +8,7 @@ authors = [
 ]
 requires-python = ">=3.14"
 dependencies = [
+    "cryptography>=48.0.1",
     "google-genai>=2.29.0",
     "groq>=1.7.0",
     "langgraph>=1.2.14",
@@ -28,6 +29,7 @@ build-backend = "uv_build"
 
 [dependency-groups]
 dev = [
+    "fakeredis[lua]>=2.39.0",
     "httpx>=0.28.1",
     "pytest>=9.1.1",
     "pytest-asyncio>=1.4.0",
