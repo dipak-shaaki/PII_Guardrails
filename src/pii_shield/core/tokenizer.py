@@ -1,4 +1,5 @@
 import logging
+from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Protocol
 
@@ -38,12 +39,17 @@ class Tokenizer:
 
     def tokenize(self, text: str, vault: TokenVault) -> TokenizedText:
         entities = self._detector.detect(text)  # raises DetectionError: fail closed
+        return self.apply(text, entities, vault)
+
+    def apply(
+        self, text: str, entities: Sequence[DetectedEntity], vault: TokenVault
+    ) -> TokenizedText:
+        """Replace already-detected entities with tokens."""
         if not entities:
             return TokenizedText(text=text, entities=())
 
-        # Assign tokens left to right so numbering follows order of appearance...
         tokens = [vault.get_or_create_token(e.entity_type, e.text) for e in entities]
-        # ...but replace right to left so earlier offsets stay valid.
+
         out = text
         for entity, token in sorted(zip(entities, tokens), key=lambda p: -p[0].start):
             out = out[: entity.start] + token + out[entity.end :]
