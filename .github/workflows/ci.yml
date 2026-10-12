@@ -1,0 +1,115 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [dev, main]
+  push:
+    branches: [dev, main]
+    tags: ["v*"]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: quality
+    runs-on: ubuntu-latest
+    services:
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    env:
+      TEST_REDIS_URL: redis://localhost:6379/15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - name: Install dependencies
+        run: uv sync --frozen
+      - name: Lint
+        run: uv run --frozen ruff check .
+      - name: Format check
+        run: uv run --frozen ruff format --check .
+      - name: Tests
+        run: uv run --frozen pytest -v -rs
+
+  docker:
+    name: docker
+    needs: quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Build image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          load: true
+          push: false
+          tags: pii-shield:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Container runs as non-root
+        run: |
+          uid=$(docker run --rm --entrypoint id pii-shield:ci -u)
+          echo "uid=$uid"
+          test "$uid" != "0"
+      - name: Smoke test
+        run: |
+          KEY=$(openssl rand -base64 32 | tr '+/' '-_')
+          docker run -d --name smoke -p 8000:8000 \
+            -e GROQ_API_KEY=ci -e GEMINI_API_KEY=ci -e ENCRYPTION_KEY="$KEY" \
+            pii-shield:ci
+          for i in $(seq 1 45); do
+            if curl -fsS localhost:8000/openapi.json > /dev/null; then
+              echo "app is up after ~$((i * 2))s"; exit 0
+            fi
+            sleep 2
+          done
+          echo "app did not start"; exit 1
+      - name: Container logs on failure
+        if: failure()
+        run: docker logs smoke
+
+  publish:
+    name: publish
+    needs: [quality, docker]
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=sha
+            type=semver,pattern={{version}}
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
