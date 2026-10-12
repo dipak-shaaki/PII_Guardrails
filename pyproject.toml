@@ -29,8 +29,12 @@ pii-guardrails = "pii_guardrails:main"
 requires = ["uv_build>=0.12.13,<0.13.0"]
 build-backend = "uv_build"
 
+[tool.uv.build-backend]
+module-name = ["pii_shield", "pii_guardrails"]
+
 [dependency-groups]
 dev = [
+    "en-core-web-lg",
     "fakeredis[lua]>=2.39.0",
     "httpx>=0.28.1",
     "pytest>=9.1.1",
@@ -41,3 +45,6 @@ dev = [
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
+
+[tool.uv.sources]
+en-core-web-lg = { url = "https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-3.8.0/en_core_web_lg-3.8.0-py3-none-any.whl" }
