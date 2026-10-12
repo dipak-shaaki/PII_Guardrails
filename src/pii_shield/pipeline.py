@@ -48,7 +48,7 @@ class PIIShield:
 
     @classmethod
     def from_settings(cls, settings: Settings | None = None) -> PIIShield:
-        return cls(Detector(settings))
+        return cls(Detector.from_settings(settings))
 
     def sanitize(self, text: str, vault: TokenVault) -> SanitizedInput:
         """Detect once, hard-block forbidden PII, then tokenize.
