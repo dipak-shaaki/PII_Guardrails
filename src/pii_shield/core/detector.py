@@ -43,7 +43,7 @@ class Detector:
         nlp_engine = NlpEngineProvider(
             nlp_configuration={
                 "nlp_engine_name": "spacy",
-                "models": [{"lang_code": language, "model_name": spacy_model}],
+                "models": [{"lang_code": language, "model_name":spacy_model}],
             }
         ).create_engine()
 

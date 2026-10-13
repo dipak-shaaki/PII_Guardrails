@@ -1,0 +1,49 @@
+# --- names ---
+My name is [[PERSON|Sita Sharma]] and I want to open a savings account.
+Hello, this is [[PERSON|Ram Bahadur Thapa]] calling about my loan.
+[[PERSON|Anita Gurung]] referred me to your branch.
+Please update the account holder to [[PERSON|Bikash Adhikari]].
+I am [[PERSON|John Smith]] from the finance team.
+Thanks, [[PERSON|Maria Garcia]], that was very helpful.
+Tell [[PERSON|Prakash Karki]] that the documents are ready.
+hi i am [[PERSON|sita sharma]], need help with my card
+# --- emails ---
+You can reach me at [[EMAIL_ADDRESS|sita.sharma@gmail.com]].
+Send the statement to [[EMAIL_ADDRESS|ram_thapa99@yahoo.com]] please.
+My work email is [[EMAIL_ADDRESS|anita.gurung@company.com.np]].
+Contact [[EMAIL_ADDRESS|support@example.org]] if it fails.
+# --- phones ---
+Call me on [[PHONE_NUMBER|9851234567]] after 5 pm.
+My number is [[PHONE_NUMBER|+977 9851234567]].
+Reach me at [[PHONE_NUMBER|+977-9861234567]] tomorrow.
+You can also try [[PHONE_NUMBER|9812345678]].
+My Indian number is [[PHONE_NUMBER|+91 98765 43210]].
+Dial [[PHONE_NUMBER|+1 415 555 2671]] for the US office.
+Office line is [[PHONE_NUMBER|(650) 253-0000]].
+UK contact: [[PHONE_NUMBER|+44 7911 123456]].
+# --- credit cards ---
+My card number is [[CREDIT_CARD|4111 1111 1111 1111]].
+Charge it to [[CREDIT_CARD|5500 0000 0000 0004]] please.
+Amex: [[CREDIT_CARD|3782 822463 10005]].
+Card [[CREDIT_CARD|4111-1111-1111-1111]] expires next year.
+# --- mixed ---
+I am [[PERSON|Sita Sharma]], email [[EMAIL_ADDRESS|sita.sharma@gmail.com]], phone [[PHONE_NUMBER|9851234567]].
+This is [[PERSON|Ram Thapa]]. Mail [[EMAIL_ADDRESS|ram_thapa99@yahoo.com]] or call [[PHONE_NUMBER|+977 9861234567]].
+[[PERSON|Anita Gurung]] paid with [[CREDIT_CARD|4111 1111 1111 1111]].
+# --- negatives: no PII ---
+What documents do I need to open a savings account?
+Order #48213 shipped on Monday.
+The meeting is at 3 pm on 12 October.
+Our fixed deposit rate is 7.5 percent per year.
+Can you explain how home loans work?
+The invoice total is 1,250,000 rupees.
+Reference code AB-2291-XZ is valid for 30 days.
+Python 3.11 was released in 2022.
+How do I reset my password?
+Please send me the brochure.
+# --- negatives: tricky ---
+Please mark my request as urgent.
+Will you be available tomorrow afternoon?
+Which branch is nearest to Kathmandu?
+Our bank is regulated by the central bank of Nepal.
+The tracking number is 1234567890123456.

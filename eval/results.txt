@@ -1,0 +1,38 @@
+
+== en_core_web_sm | threshold 0.4 | 42 examples ==
+type                 P      R     F1  strict F1  support
+PERSON            1.00   0.91   0.95       0.95       11
+EMAIL_ADDRESS     1.00   1.00   1.00       1.00        6
+PHONE_NUMBER      1.00   1.00   1.00       1.00       10
+CREDIT_CARD       1.00   1.00   1.00       1.00        5
+ALL (micro)       1.00   0.97   0.98       0.98       32
+latency per message: median 8 ms, p95 11 ms
+other entity types detected (not scored): {'UK_NHS': 4, 'NRP': 1, 'LOCATION': 4, 'ORGANIZATION': 1}
+
+errors:
+  [missed] PERSON: 'Prakash Karki'  <-  Tell Prakash Karki that the documents are ready.
+
+== en_core_web_md | threshold 0.4 | 42 examples ==
+type                 P      R     F1  strict F1  support
+PERSON            1.00   1.00   1.00       1.00       11
+EMAIL_ADDRESS     1.00   1.00   1.00       1.00        6
+PHONE_NUMBER      1.00   1.00   1.00       1.00       10
+CREDIT_CARD       1.00   1.00   1.00       1.00        5
+ALL (micro)       1.00   1.00   1.00       1.00       32
+latency per message: median 9 ms, p95 11 ms
+other entity types detected (not scored): {'UK_NHS': 4, 'NRP': 1, 'LOCATION': 4, 'ORGANIZATION': 4}
+
+errors:
+
+== en_core_web_lg | threshold 0.4 | 42 examples ==
+type                 P      R     F1  strict F1  support
+PERSON            0.92   1.00   0.96       0.96       11
+EMAIL_ADDRESS     1.00   1.00   1.00       1.00        6
+PHONE_NUMBER      1.00   1.00   1.00       1.00       10
+CREDIT_CARD       1.00   1.00   1.00       1.00        5
+ALL (micro)       0.97   1.00   0.98       0.98       32
+latency per message: median 10 ms, p95 11 ms
+other entity types detected (not scored): {'UK_NHS': 4, 'NRP': 1, 'LOCATION': 4, 'ORGANIZATION': 4}
+
+errors:
+  [false_positive] PERSON: 'mark'  <-  Please mark my request as urgent.
