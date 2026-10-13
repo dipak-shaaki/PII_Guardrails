@@ -1,8 +1,10 @@
 import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 
 from pii_shield.agent import PIIAgent
 from pii_shield.agent.demo_tools import demo_registry
@@ -61,6 +63,12 @@ def create_app(use_lifespan: bool = True) -> FastAPI:
     )
     register_error_handlers(app)
     app.include_router(router)
+    # Mounted last so API routes above take precedence. Same origin: no CORS.
+    app.mount(
+        "/",
+        StaticFiles(directory=Path(__file__).resolve().parent.parent / "static", html=True),
+        name="static",
+    )
     return app
 
 

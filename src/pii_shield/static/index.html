@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="PII Shield - see exactly what the LLM sees." />
+  <title>PII Shield</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo" aria-hidden="true"></span>
+      <div>
+        <h1>PII Shield</h1>
+        <p class="tagline">The LLM never sees raw PII. Watch it get tokenized.</p>
+      </div>
+    </div>
+    <div class="session">
+      <span class="session-label">Session</span>
+      <code id="session-id" class="session-id">new</code>
+      <button id="reset" class="btn ghost" type="button" title="Delete this session">Reset</button>
+    </div>
+  </header>
+
+  <main>
+    <form id="composer" class="composer" autocomplete="off">
+      <div class="input-row">
+        <input
+          id="message"
+          class="message"
+          type="text"
+          placeholder="Type a message with some personal details..."
+          maxlength="4000"
+          aria-label="Message"
+        />
+        <button id="send" class="btn primary" type="submit">
+          <span class="spinner" aria-hidden="true"></span>
+          <span class="send-label">Send</span>
+        </button>
+      </div>
+      <div class="chips-row" id="examples" aria-label="Example prompts">
+        <span class="chips-hint">Try:</span>
+      </div>
+    </form>
+
+    <div id="banner" class="banner" hidden role="alert"></div>
+
+    <section class="panels" aria-label="Pipeline view">
+      <article class="panel">
+        <header class="panel-head">
+          <h2>What you typed</h2>
+          <span class="panel-note">raw, stays local</span>
+        </header>
+        <div id="typed" class="panel-body empty">Your message will appear here.</div>
+      </article>
+
+      <article class="panel">
+        <header class="panel-head">
+          <h2>What the LLM saw</h2>
+          <span class="panel-note">tokenized, sent to provider</span>
+        </header>
+        <div id="llm-saw" class="panel-body empty">Placeholders appear here.</div>
+      </article>
+
+      <article class="panel">
+        <header class="panel-head">
+          <h2>What you got back</h2>
+          <span class="badge provider" id="provider-badge" hidden></span>
+        </header>
+        <div id="reply" class="panel-body empty">The assistant reply appears here.</div>
+      </article>
+    </section>
+
+    <details class="hood" id="hood">
+      <summary>Under the hood</summary>
+      <div class="hood-grid">
+        <section class="hood-card">
+          <h3>Token map <span class="panel-note">placeholder &rarr; real value</span></h3>
+          <div id="token-map" class="panel-body empty">Enable EXPOSE_TOKEN_MAP to see this.</div>
+        </section>
+        <section class="hood-card">
+          <h3>LLM reply <span class="panel-note">before restoration</span></h3>
+          <div id="llm-reply" class="panel-body empty">Tokenized model output.</div>
+        </section>
+        <section class="hood-card span-2">
+          <h3>Trace <span class="panel-note">tool calls &amp; results, tokenized</span></h3>
+          <ol id="trace" class="trace empty"><li class="muted">No tool activity on this turn.</li></ol>
+        </section>
+      </div>
+    </details>
+
+    <section class="log" aria-label="Conversation log">
+      <header class="log-head">
+        <h2>Conversation log</h2>
+        <div class="log-actions">
+          <button id="refresh" class="btn ghost small" type="button">Load stored session</button>
+          <label class="switch">
+            <input type="checkbox" id="view-toggle" />
+            <span>Show tokenized view</span>
+          </label>
+        </div>
+      </header>
+      <div id="log" class="log-body empty">Turns will stack here, so you can watch tokens get reused across the conversation.</div>
+    </section>
+  </main>
+
+  <script src="/app.js" defer></script>
+</body>
+</html>
