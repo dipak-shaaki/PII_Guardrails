@@ -127,30 +127,47 @@ A blocked message (credit card) returns HTTP 200 with `"blocked": true`, since t
 
 ## Evaluation
 
-Run on `[TODO: N]` labeled sentences (names, emails, phones from several regions, credit cards, and negatives that should *not* be flagged):
+`eval/dataset.txt` has 42 hand-written, synthetic sentences with 32 labeled PII spans (names including a lowercase one, emails, phone numbers from Nepal, India, the UK and the US, credit cards) plus sentences with no PII that should not be flagged. It is a regression check, not a benchmark: it is small and I wrote it myself.
 
 ```bash
-uv run python -m pii_shield.evaluation --models en_core_web_sm en_core_web_md en_core_web_lg
+uv run python -m pii_shield.evaluation --models en_core_web_sm en_core_web_md en_core_web_lg --errors
 ```
 
-Results with `[TODO: model]`, threshold `[TODO]`:
+Scoring is entity-level: a prediction counts only when the entity type matches and the span overlaps a gold span. A stricter variant requires exact boundaries. Full output is in `eval/results.txt`.
 
-| Entity | Precision | Recall | F1 |
-|---|---|---|---|
-| PERSON | [TODO] | [TODO] | [TODO] |
-| EMAIL_ADDRESS | [TODO] | [TODO] | [TODO] |
-| PHONE_NUMBER | [TODO] | [TODO] | [TODO] |
-| CREDIT_CARD | [TODO] | [TODO] | [TODO] |
+Results with `en_core_web_md`, threshold 0.4:
 
-Model trade-off:
-
-| spaCy model | Micro recall | Median latency / message | Image size | Idle RAM |
+| Entity | Precision | Recall | F1 | Spans |
 |---|---|---|---|---|
-| `en_core_web_sm` | [TODO] | [TODO] ms | [TODO] | [TODO] |
-| `en_core_web_md` | [TODO] | [TODO] ms | [TODO] | [TODO] |
-| `en_core_web_lg` | [TODO] | [TODO] ms | n/a | n/a |
+| PERSON | 1.00 | 1.00 | 1.00 | 11 |
+| EMAIL_ADDRESS | 1.00 | 1.00 | 1.00 | 6 |
+| PHONE_NUMBER | 1.00 | 1.00 | 1.00 | 10 |
+| CREDIT_CARD | 1.00 | 1.00 | 1.00 | 5 |
+| All (micro) | 1.00 | 1.00 | 1.00 | 32 |
 
-Recall is weighted over precision, because a missed span is a leak while a false positive only costs usability. `[TODO: one sentence on why you chose the shipped model.]`
+Model comparison:
+
+| spaCy model | PERSON precision | PERSON recall | Micro F1 | Errors | Image size | Idle RAM |
+|---|---|---|---|---|---|---|
+| `en_core_web_sm` | 1.00 | 0.91 | 0.98 | missed "Prakash Karki" | [TODO] | [TODO] |
+| `en_core_web_md` | 1.00 | 1.00 | 1.00 | none | [TODO] | [TODO] |
+| `en_core_web_lg` | 0.92 | 1.00 | 0.98 | false positive "mark" | n/a | n/a |
+
+Image size comes from `docker images`, idle RAM from `docker stats --no-stream`. Median latency was 8-10 ms per message (p95 11 ms) for all three models on a laptop CPU, detection only.
+
+Findings:
+
+- Emails, phone numbers and card numbers were detected with exact boundaries by every model.
+- Names are where the models differ, and each difference is a single sentence: `sm` missed one name, `lg` flagged the word "mark" as a person, and `md` made neither error. All three caught the lowercase name "sita sharma".
+- Latency differences between the models are within run-to-run noise, so the model choice rests on memory and image size, not speed. I ship `md`: [TODO: e.g. "it matched lg's results at X MB less"]. An agent turn runs several scans (user input, model messages, tool results).
+- Recall is weighted over precision: a missed span is a leak, a false positive only costs usability.
+
+Known limitations:
+
+- With only 11 name spans, a single miss moves PERSON recall by about 9 points. These numbers show no regressions on a small set, not that detection is perfect.
+- Words that double as first names can produce false positives (`lg` flags "mark" in "Please mark my request as urgent").
+- Only the four types above are scored. The pipeline also detects [TODO: list per your decision], which affects retrieval quality and is configurable via [TODO].
+- Not evaluated: non-English text, deliberately obfuscated PII ("nine eight five..."), long documents, adversarial input.
 
 ## Project structure
 
