@@ -4,7 +4,7 @@ Privacy-preserving middleware for LLM applications. **The model never sees raw p
 
 PII Shield sits between your app and an LLM provider. It replaces names, emails, phone numbers and similar data with placeholder tokens before anything leaves your server. The model reasons and calls tools using only those tokens, and real values come back only at the last moment, when a tool actually executes or when the final answer is shown to the user.
 
-[![CI](https://github.com/dipak-shaaki/[TODO-repo-name]/actions/workflows/ci.yml/badge.svg)](https://github.com/dipak-shaaki/[TODO-repo-name]/actions/workflows/ci.yml)
+[![CI](https://github.com/dips-shaaki/[TODO-repo-name]/actions/workflows/ci.yml/badge.svg)](https://github.com/dips-shaaki/[TODO-repo-name]/actions/workflows/ci.yml)
 
 ## The problem
 
@@ -19,7 +19,7 @@ sequenceDiagram
     participant L as LLM (Groq / Gemini)
     participant T as Tools
 
-    U->>S: "I'm Dipak, email dipak@example.com"
+    U->>S: "I'm dips, email dips@example.com"
     S->>S: detect + tokenize
     S->>L: "I'm <PERSON_1>, email <EMAIL_ADDRESS_1>"
     L->>S: tool call send_email(to=<EMAIL_ADDRESS_1>)
@@ -27,7 +27,7 @@ sequenceDiagram
     T->>S: result containing real values
     S->>L: result, re-tokenized
     L->>S: "Sent to <EMAIL_ADDRESS_1>"
-    S->>U: restore -> "Sent to dipak@example.com"
+    S->>U: restore -> "Sent to dips@example.com"
 ```
 
 Five points are guarded, not two:
@@ -57,7 +57,7 @@ Two queries come out of every message: `llm_query` (fully tokenized, the only ve
 Requirements: Python 3.11, [uv](https://docs.astral.sh/uv/), Redis.
 
 ```bash
-git clone https://github.com/dipak-shaaki/[TODO-repo-name].git
+git clone https://github.com/dips-shaaki/[TODO-repo-name].git
 cd [TODO-repo-name]
 uv sync
 cp .env.example .env
@@ -85,7 +85,7 @@ from pii_shield import PIIShield, TokenVault
 shield = PIIShield.from_settings()
 vault = TokenVault()  # one per conversation
 
-safe = shield.sanitize("Hi, I'm Dipak Shanki, call me on 9841657581", vault)
+safe = shield.sanitize("Hi, I'm dips , call me on 9841657581", vault)
 safe.llm_query   # "Hi, I'm <PERSON_1>, call me on <PHONE_NUMBER_1>"  -> send this to your LLM
 
 reply = shield.sanitize_output(llm_text, vault).text  # re-scan the model's answer
@@ -105,7 +105,7 @@ shield.restore(reply, vault)                          # real values, for the use
 
 ```bash
 curl -s localhost:8000/chat -H 'content-type: application/json' \
-  -d '{"message":"Hi, I am Dipak Shanki, email dipak@example.com"}'
+  -d '{"message":"Hi, I am dips , email dips@example.com"}'
 ```
 
 A blocked message (credit card) returns HTTP 200 with `"blocked": true`, since that is the guardrail working, not a server error.
@@ -147,11 +147,11 @@ Results with `en_core_web_md`, threshold 0.4:
 
 Model comparison:
 
-| spaCy model | PERSON precision | PERSON recall | Micro F1 | Errors | Image size | Idle RAM |
+| spaCy model | PERSON precision | PERSON recall | Micro F1 | Errors | 
 |---|---|---|---|---|---|---|
-| `en_core_web_sm` | 1.00 | 0.91 | 0.98 | missed "Prakash Karki" | [TODO] | [TODO] |
+| `en_core_web_sm` | 1.00 | 0.91 | 0.98 | missed "Prakash Karki" |
 | `en_core_web_md` | 1.00 | 1.00 | 1.00 | none | [TODO] | [TODO] |
-| `en_core_web_lg` | 0.92 | 1.00 | 0.98 | false positive "mark" | n/a | n/a |
+| `en_core_web_lg` | 0.92 | 1.00 | 0.98 | false positive "mark" 
 
 Image size comes from `docker images`, idle RAM from `docker stats --no-stream`. Median latency was 8-10 ms per message (p95 11 ms) for all three models on a laptop CPU, detection only.
 
