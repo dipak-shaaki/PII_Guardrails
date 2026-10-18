@@ -57,8 +57,8 @@ Two queries come out of every message: `llm_query` (fully tokenized, the only ve
 Requirements: Python 3.11, [uv](https://docs.astral.sh/uv/), Redis.
 
 ```bash
-git clone https://github.com/dips-shaaki/[TODO-repo-name].git
-cd [TODO-repo-name]
+git clone https://github.com/dipak-shaaki/PII_Guardrails.git
+cd https://github.com/dipak-shaaki/PII_Guardrails.git
 uv sync
 cp .env.example .env
 # add GROQ_API_KEY and GEMINI_API_KEY, then generate an encryption key:
