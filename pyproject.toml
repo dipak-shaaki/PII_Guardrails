@@ -1,7 +1,7 @@
 [project]
 name = "pii-guardrails"
 version = "0.1.0"
-description = "Add your description here"
+description = "ai-saftey-guardrails"
 readme = "README.md"
 authors = [
     { name = "dipak-shaaki", email = "shanki.dipak@gmail.com" }
