@@ -15,14 +15,16 @@ def entity(etype: str, value: str, start: int = 0) -> DetectedEntity:
 
 
 def test_input_guard_blocks_credit_card():
+    guard = InputGuard()
     with pytest.raises(InputBlockedError) as exc:
-        InputGuard().check([entity("CREDIT_CARD", CARD)])
+        guard.check([entity("CREDIT_CARD", CARD)])
     assert exc.value.entity_types == ("CREDIT_CARD",)
 
 
 def test_input_guard_error_never_contains_the_value():
+    guard = InputGuard()
     with pytest.raises(InputBlockedError) as exc:
-        InputGuard().check([entity("CREDIT_CARD", CARD)])
+        guard.check([entity("CREDIT_CARD", CARD)])
     assert CARD not in str(exc.value)
 
 

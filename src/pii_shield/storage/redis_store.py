@@ -79,7 +79,7 @@ class SessionStore:
                 pipe.expire(key, self._ttl)
                 raw, _ = await pipe.execute()
         except RedisError as exc:
-            logger.error("Redis load failed: %s", type(exc).__name__)
+            logger.exception("Redis load failed")
             raise SessionStoreError("could not load session") from exc
 
         if not raw:
@@ -89,8 +89,7 @@ class SessionStore:
             vault = TokenVault.from_dict(json.loads(self._fernet.decrypt(raw["vault"])))
             history = [message_from_dict(m) for m in json.loads(raw["history"])]
         except (InvalidToken, KeyError, TypeError, ValueError) as exc:
-            # Log the type only: never include payloads.
-            logger.error("Session data unreadable: %s", type(exc).__name__)
+            logger.exception("Session data unreadable")
             raise SessionStoreError("session data is unreadable") from exc
         return SessionData(vault=vault, history=history)
 
@@ -110,7 +109,7 @@ class SessionStore:
                 pipe.expire(key, self._ttl)
                 await pipe.execute()
         except RedisError as exc:
-            logger.error("Redis save failed: %s", type(exc).__name__)
+            logger.exception("Redis save failed")
             raise SessionStoreError("could not save session") from exc
 
     async def delete(self, session_id: str) -> bool:
@@ -118,7 +117,7 @@ class SessionStore:
         try:
             return bool(await self._client.delete(key))
         except RedisError as exc:
-            logger.error("Redis delete failed: %s", type(exc).__name__)
+            logger.exception("Redis delete failed")
             raise SessionStoreError("could not delete session") from exc
 
     @asynccontextmanager
@@ -152,8 +151,8 @@ class SessionStore:
                 await lock.release()
             except LockError:
                 logger.warning("Session lock expired before release")
-            except RedisError as exc:
-                logger.error("Lock release failed: %s", type(exc).__name__)
+            except RedisError:
+                logger.exception("Lock release failed")
 
     async def ping(self) -> bool:
         try:

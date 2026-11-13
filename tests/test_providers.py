@@ -41,16 +41,18 @@ async def test_falls_back_on_unavailable():
 async def test_all_failing_raises_aggregate_error():
     a = FakeProvider("a", ProviderUnavailableError("a", "timeout"))
     b = FakeProvider("b", ProviderUnavailableError("b", "500"))
+    provider = FallbackProvider([a, b])
     with pytest.raises(AllProvidersFailedError) as exc:
-        await FallbackProvider([a, b]).generate(MSGS)
+        await provider.generate(MSGS)
     assert len(exc.value.failures) == 2
 
 
 async def test_permanent_error_does_not_fall_back():
     a = FakeProvider("a", ProviderRequestError("a", "bad key"))
     b = FakeProvider("b")
+    provider = FallbackProvider([a, b])
     with pytest.raises(ProviderRequestError):
-        await FallbackProvider([a, b]).generate(MSGS)
+        await provider.generate(MSGS)
     assert b.calls == 0
 
 

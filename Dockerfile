@@ -17,19 +17,17 @@ WORKDIR /app
 # Copy only the files that define dependencies, then install them. This layer
 # is cached and reused until pyproject.toml or uv.lock actually change.
 COPY pyproject.toml uv.lock README.md ./
-RUN uv sync --frozen --no-dev --no-install-project
+RUN uv sync --frozen --no-dev --no-build --no-install-project
 
-# --- Project code -----------------------------------------------------------
-# Copy the source and install the project itself into the same venv.
+# --- Project code and spaCy model -------------------------------------------
+# Copy the source and install the project, then bake in the model Presidio needs
+# at runtime. --no-deps is safe: spaCy and everything else comes from the lock.
 COPY src ./src
-RUN uv sync --frozen --no-dev --no-editable
-
-# --- spaCy model ------------------------------------------------------------
-# Presidio needs this model at runtime, so bake it in (no download on startup).
-# Override at build time: --build-arg SPACY_MODEL=en_core_web_sm
 ARG SPACY_MODEL=en_core_web_lg
 ARG SPACY_MODEL_VERSION=3.8.0
-RUN uv pip install --python /app/.venv/bin/python \
+# Override at build time: --build-arg SPACY_MODEL=en_core_web_sm
+RUN uv sync --frozen --no-dev --no-build --no-editable \
+    && uv pip install --python /app/.venv/bin/python --no-build --no-deps \
     "https://github.com/explosion/spacy-models/releases/download/${SPACY_MODEL}-${SPACY_MODEL_VERSION}/${SPACY_MODEL}-${SPACY_MODEL_VERSION}-py3-none-any.whl"
 
 # --- Run as a non-root user -------------------------------------------------

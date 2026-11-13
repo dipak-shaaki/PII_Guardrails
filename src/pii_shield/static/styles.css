@@ -168,8 +168,8 @@ main {
   font-weight: 500;
   border: 1px solid;
 }
-.banner.blocked { background: rgba(255, 92, 114, 0.12); border-color: rgba(255, 92, 114, 0.5); color: #ffc4cd; }
-.banner.error { background: rgba(255, 176, 32, 0.12); border-color: rgba(255, 176, 32, 0.5); color: #ffe0a8; }
+.banner.blocked { background: #3a1a22; border-color: rgba(255, 92, 114, 0.5); color: #ffe1e6; }
+.banner.error { background: #3a2a10; border-color: rgba(255, 176, 32, 0.5); color: #fff0cc; }
 
 /* ---------- panels ---------- */
 .panels {
@@ -234,8 +234,8 @@ main {
   border-radius: 999px;
   border: 1px solid;
 }
-.badge.groq { color: #a9ffd6; border-color: rgba(53, 208, 127, 0.55); background: rgba(53, 208, 127, 0.12); }
-.badge.gemini { color: #bcd0ff; border-color: rgba(91, 140, 255, 0.55); background: rgba(91, 140, 255, 0.12); }
+.badge.groq { color: #d9ffe9; border-color: rgba(53, 208, 127, 0.55); background: #123a26; }
+.badge.gemini { color: #e2e9ff; border-color: rgba(91, 140, 255, 0.55); background: #1a2547; }
 .badge.other { color: var(--muted); border-color: var(--line); background: var(--panel-2); }
 
 /* ---------- under the hood ---------- */
@@ -333,4 +333,13 @@ main {
   .panels { grid-template-columns: 1fr; }
   .hood-grid { grid-template-columns: 1fr; }
   .panel { min-height: 150px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

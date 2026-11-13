@@ -49,8 +49,9 @@ def test_credit_card_blocked_before_vault_is_touched():
 
 def test_detection_failure_fails_closed():
     shield = PIIShield(BrokenDetector())
+    vault = TokenVault()
     with pytest.raises(DetectionError):
-        shield.sanitize("anything", TokenVault())
+        shield.sanitize("anything", vault)
 
 
 def test_full_round_trip_across_turns():
@@ -68,7 +69,8 @@ def test_output_leak_is_retokenized_then_restorable():
     shield.sanitize("I am Dipak", vault)
     scan = shield.sanitize_output("Sure Dipak, ring 9841657581", vault)
     assert scan.leaked
-    assert "9841657581" not in scan.text and "Dipak" not in scan.text
+    assert "9841657581" not in scan.text
+    assert "Dipak" not in scan.text
     assert shield.restore(scan.text, vault) == "Sure Dipak, ring 9841657581"
 
 

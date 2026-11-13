@@ -19,13 +19,13 @@ class BookCallbackArgs(BaseModel):
     preferred_time: str = Field(description="When the customer wants the call")
 
 
-async def send_confirmation_email(args: SendEmailArgs) -> dict:
+def send_confirmation_email(args: SendEmailArgs) -> dict:
     # A real integration (SMTP / email API) goes here. It receives REAL values.
     logger.info("Confirmation email dispatched")  # never log the recipient
     return {"status": "sent", "to": args.to_email}
 
 
-async def book_callback(args: BookCallbackArgs) -> dict:
+def book_callback(args: BookCallbackArgs) -> dict:
     logger.info("Callback booked")
     return {
         "status": "booked",

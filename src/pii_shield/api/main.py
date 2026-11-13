@@ -32,7 +32,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     ]
     if missing:
         raise RuntimeError(f"Missing required settings: {', '.join(missing)}")
-    
+
     logging.basicConfig(
         level=settings.log_level,
         format="%(asctime)s %(levelname)s %(name)s: %(message)s",
@@ -66,7 +66,9 @@ def create_app(use_lifespan: bool = True) -> FastAPI:
     # Mounted last so API routes above take precedence. Same origin: no CORS.
     app.mount(
         "/",
-        StaticFiles(directory=Path(__file__).resolve().parent.parent / "static", html=True),
+        StaticFiles(
+            directory=Path(__file__).resolve().parent.parent / "static", html=True
+        ),
         name="static",
     )
     return app

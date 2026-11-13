@@ -1,3 +1,4 @@
+import inspect
 import json
 import logging
 from collections.abc import Awaitable, Callable, Iterator, Sequence
@@ -18,7 +19,7 @@ class Tool:
     name: str
     description: str
     args_model: type[BaseModel]  # validates arguments and generates the JSON schema
-    handler: Callable[[Any], Awaitable[Any]]  # receives a validated args_model instance
+    handler: Callable[[Any], Awaitable[Any] | Any]  # may be sync or async
 
     @property
     def spec(self) -> ToolSpec:
@@ -51,12 +52,14 @@ class ToolRegistry:
             )
             raise ToolError(f"invalid arguments ({problems})") from exc
         try:
-            result = await tool.handler(args)
+            result = tool.handler(args)
+            if inspect.isawaitable(result):
+                result = await result
         except ToolError:
             raise
         except Exception as exc:
             # Log the type only: exception messages can contain real PII.
-            logger.error("Tool %s failed: %s", name, type(exc).__name__)
+            logger.error("Tool %s failed: %s", name, type(exc).__name__)  # NOSONAR
             raise ToolError("tool execution failed") from exc
         return json.dumps(result, default=str)
 

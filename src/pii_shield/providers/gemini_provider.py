@@ -37,20 +37,56 @@ def _to_contents(messages: Sequence[Message]) -> list[types.Content]:
             continue
 
         last_was_tool = False
-        if m.role == "assistant":
-            parts = [types.Part(text=m.content)] if m.content else []
-            parts += [
-                types.Part(
-                    function_call=types.FunctionCall(name=c.name, args=c.arguments)
-                )
-                for c in m.tool_calls
-            ]
-            contents.append(types.Content(role="model", parts=parts))
-        else:
-            contents.append(
-                types.Content(role="user", parts=[types.Part(text=m.content)])
-            )
+        contents.append(
+            _assistant_content(m)
+            if m.role == "assistant"
+            else types.Content(role="user", parts=[types.Part(text=m.content)])
+        )
     return contents
+
+
+def _assistant_content(m: Message) -> types.Content:
+    parts = [types.Part(text=m.content)] if m.content else []
+    parts += [
+        types.Part(function_call=types.FunctionCall(name=c.name, args=c.arguments))
+        for c in m.tool_calls
+    ]
+    return types.Content(role="model", parts=parts)
+
+
+def _build_tools(tools: Sequence[ToolSpec] | None) -> list[types.Tool] | None:
+    if not tools:
+        return None
+    return [
+        types.Tool(
+            function_declarations=[
+                types.FunctionDeclaration(
+                    name=t.name,
+                    description=t.description,
+                    parameters_json_schema=t.parameters,
+                )
+                for t in tools
+            ]
+        )
+    ]
+
+
+def _to_response(resp, provider: str, model: str) -> LLMResponse:
+    candidate = resp.candidates[0] if resp.candidates else None
+    parts = (candidate.content.parts or []) if candidate and candidate.content else []
+    text = "".join(p.text for p in parts if p.text and not p.thought)
+    calls = tuple(
+        ToolCall(
+            id=p.function_call.id or f"call_{uuid.uuid4().hex[:8]}",
+            name=p.function_call.name,
+            arguments=dict(p.function_call.args or {}),
+        )
+        for p in parts
+        if p.function_call
+    )
+    if not text and not calls:
+        raise ProviderUnavailableError(provider, "empty response")
+    return LLMResponse(text=text, provider=provider, model=model, tool_calls=calls)
 
 
 class GeminiProvider(LLMProvider):
@@ -67,28 +103,12 @@ class GeminiProvider(LLMProvider):
         self, messages: Sequence[Message], tools: Sequence[ToolSpec] | None = None
     ) -> LLMResponse:
         system = "\n".join(m.content for m in messages if m.role == "system") or None
-        gemini_tools = (
-            [
-                types.Tool(
-                    function_declarations=[
-                        types.FunctionDeclaration(
-                            name=t.name,
-                            description=t.description,
-                            parameters_json_schema=t.parameters,
-                        )
-                        for t in tools
-                    ]
-                )
-            ]
-            if tools
-            else None
-        )
         try:
             resp = await self._client.aio.models.generate_content(
                 model=self._model,
                 contents=_to_contents(messages),
                 config=types.GenerateContentConfig(
-                    system_instruction=system, tools=gemini_tools
+                    system_instruction=system, tools=_build_tools(tools)
                 ),
             )
         except errors.ServerError as exc:
@@ -102,23 +122,4 @@ class GeminiProvider(LLMProvider):
         except httpx.HTTPError as exc:
             raise ProviderUnavailableError(self.name, type(exc).__name__) from exc
 
-        candidate = resp.candidates[0] if resp.candidates else None
-        parts = (
-            (candidate.content.parts or []) if candidate and candidate.content else []
-        )
-
-        text = "".join(p.text for p in parts if p.text and not p.thought)
-        calls = tuple(
-            ToolCall(
-                id=p.function_call.id or f"call_{uuid.uuid4().hex[:8]}",
-                name=p.function_call.name,
-                arguments=dict(p.function_call.args or {}),
-            )
-            for p in parts
-            if p.function_call
-        )
-        if not text and not calls:
-            raise ProviderUnavailableError(self.name, "empty response")
-        return LLMResponse(
-            text=text, provider=self.name, model=self._model, tool_calls=calls
-        )
+        return _to_response(resp, self.name, self._model)

@@ -78,10 +78,12 @@ async def test_tool_gets_real_values_and_llm_sees_only_tokens():
     assert result.reply == "Sent to dipak@example.com, Dipak."
     # the LLM never saw any (including the tool result, which was re-tokenized)
     seen = everything_llm_saw(provider)
-    assert "Dipak" not in seen and "dipak@example.com" not in seen
+    assert "Dipak" not in seen
+    assert "dipak@example.com" not in seen
     # and the persisted history is tokens only
     stored = "\n".join(m.content for m in result.history)
-    assert "Dipak" not in stored and "dipak@example.com" not in stored
+    assert "Dipak" not in stored
+    assert "dipak@example.com" not in stored
     assert result.llm_query == "I'm <PERSON_1>, email me at <EMAIL_ADDRESS_1>"
 
 

@@ -38,7 +38,11 @@ def parse_example(marked: str) -> Example:
 
 
 def load_dataset(path: Path) -> list[Example]:
-    """One example per line. Blank lines and lines starting with # are ignored."""
+    """One example per line. The path must stay inside the working directory."""
+    root = Path.cwd().resolve()
+    path = path.resolve()
+    if not path.is_relative_to(root):
+        raise ValueError(f"dataset path must be inside {root}")
     examples = []
     for line in path.read_text(encoding="utf-8").splitlines():
         line = line.strip()

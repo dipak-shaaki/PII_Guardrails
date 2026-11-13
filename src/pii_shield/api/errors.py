@@ -24,7 +24,7 @@ def _register(
     message: str,
     log_level: int = logging.WARNING,
 ) -> None:
-    async def handler(request: Request, exc: Exception) -> JSONResponse:
+    def handler(request: Request, exc: Exception) -> JSONResponse:
         # Log the type only: exception text could contain user data.
         logger.log(log_level, "%s -> HTTP %d", type(exc).__name__, status)
         return JSONResponse(status_code=status, content={"error": message})

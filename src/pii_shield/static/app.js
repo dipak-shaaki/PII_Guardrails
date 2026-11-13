@@ -40,7 +40,7 @@ function typeFromToken(token) {
 
 function hue(str) {
   let h = 0;
-  for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) % 360;
+  for (let i = 0; i < str.length; i++) h = (h * 31 + str.codePointAt(i)) % 360;
   return h;
 }
 
@@ -128,7 +128,10 @@ function renderPanels(turn) {
   if (turn.provider) {
     el.provider.hidden = false;
     const p = turn.provider.toLowerCase();
-    el.provider.className = "badge provider " + (p.includes("groq") ? "groq" : p.includes("gemini") ? "gemini" : "other");
+    let kind = "other";
+    if (p.includes("groq")) kind = "groq";
+    else if (p.includes("gemini")) kind = "gemini";
+    el.provider.className = "badge provider " + kind;
     el.provider.textContent = turn.provider;
   } else {
     el.provider.hidden = true;
@@ -241,32 +244,43 @@ function renderServerLog(tokenized) {
   frag.appendChild(note);
   for (const msg of history) {
     if (msg.role === "system") continue;
-    const card = document.createElement("div");
-    card.className = "turn " + (msg.role === "assistant" ? "assistant" : "user");
-    const row = document.createElement("div");
-    row.className = "line " + (msg.role === "assistant" ? "assistant" : "user");
-    const who = document.createElement("span");
-    who.className = "who";
-    who.textContent = msg.role === "tool" ? "tool" : msg.role === "assistant" ? "assistant" : "you";
-    const bubble = document.createElement("span");
-    bubble.className = "bubble";
-    const shown = tokenized ? msg.content : restore(msg.content, token_map);
-    if (tokenized) {
-      bubble.replaceChildren(tokensFragment(shown));
-    } else {
-      bubble.textContent = shown || "";
-    }
-    row.append(who, bubble);
-    card.appendChild(row);
-    frag.appendChild(card);
+    frag.appendChild(historyCard(msg, tokenized, token_map));
   }
   el.log.replaceChildren(frag);
+}
+
+function roleLabel(role) {
+  if (role === "assistant") return "assistant";
+  if (role === "tool") return "tool";
+  return "you";
+}
+
+function historyCard(msg, tokenized, tokenMap) {
+  const cls = msg.role === "assistant" ? "assistant" : "user";
+  const card = document.createElement("div");
+  card.className = "turn " + cls;
+  const row = document.createElement("div");
+  row.className = "line " + cls;
+  const who = document.createElement("span");
+  who.className = "who";
+  who.textContent = roleLabel(msg.role);
+  const bubble = document.createElement("span");
+  bubble.className = "bubble";
+  const shown = tokenized ? msg.content : restore(msg.content, tokenMap);
+  if (tokenized) {
+    bubble.replaceChildren(tokensFragment(shown));
+  } else {
+    bubble.textContent = shown || "";
+  }
+  row.append(who, bubble);
+  card.appendChild(row);
+  return card;
 }
 
 /* ---------- network ---------- */
 
 function friendlyError(status, body) {
-  if (body && body.error) return body.error;
+  if (body?.error) return body.error;
   if (status === 422) return "That message was rejected (empty, too long, or a bad session id).";
   if (status === 409) return "This session is busy. Try again in a moment.";
   if (status === 503) return "The service is temporarily unavailable. Try again shortly.";

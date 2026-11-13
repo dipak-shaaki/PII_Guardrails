@@ -4,6 +4,8 @@ Privacy-preserving middleware for LLM applications. **The model never sees raw p
 
 PII Shield sits between your app and an LLM provider. It replaces names, emails, phone numbers and similar data with placeholder tokens before anything leaves your server. The model reasons and calls tools using only those tokens, and real values come back only at the last moment, when a tool actually executes or when the final answer is shown to the user.
 
+[![CI](https://github.com/dipak-shaaki/[TODO-repo-name]/actions/workflows/ci.yml/badge.svg)](https://github.com/dipak-shaaki/[TODO-repo-name]/actions/workflows/ci.yml)
+
 ## The problem
 
 Chatbots, RAG assistants and support agents receive personal data in free text, and by default all of it is forwarded to a third-party LLM provider. For regulated domains (banking, healthcare) that is a compliance risk, and most RAG tutorials ignore it.
@@ -17,7 +19,7 @@ sequenceDiagram
     participant L as LLM (Groq / Gemini)
     participant T as Tools
 
-    U->>S: "I'm dips, email dips@example.com"
+    U->>S: "I'm Dipak, email dipak@example.com"
     S->>S: detect + tokenize
     S->>L: "I'm <PERSON_1>, email <EMAIL_ADDRESS_1>"
     L->>S: tool call send_email(to=<EMAIL_ADDRESS_1>)
@@ -25,7 +27,7 @@ sequenceDiagram
     T->>S: result containing real values
     S->>L: result, re-tokenized
     L->>S: "Sent to <EMAIL_ADDRESS_1>"
-    S->>U: restore -> "Sent to dips@example.com"
+    S->>U: restore -> "Sent to dipak@example.com"
 ```
 
 Five points are guarded, not two:
@@ -55,8 +57,8 @@ Two queries come out of every message: `llm_query` (fully tokenized, the only ve
 Requirements: Python 3.11, [uv](https://docs.astral.sh/uv/), Redis.
 
 ```bash
-git clone https://github.com/dipak-shaaki/PII_Guardrails.git
-cd PII_Guardrails
+git clone https://github.com/dipak-shaaki/[TODO-repo-name].git
+cd [TODO-repo-name]
 uv sync
 cp .env.example .env
 # add GROQ_API_KEY and GEMINI_API_KEY, then generate an encryption key:
@@ -83,11 +85,11 @@ from pii_shield import PIIShield, TokenVault
 shield = PIIShield.from_settings()
 vault = TokenVault()  # one per conversation
 
-safe = shield.sanitize("Hi, I'm dips , call me on 9841657581", vault)
-safe.llm_query   # "Hi, I'm <PERSON_1>, call me on <PHONE_NUMBER_1>"  -> send this to your LLM
+safe = shield.sanitize("Hi, I'm Dipak Shanki, call me on 9841657581", vault)
+safe.llm_query  # "Hi, I'm <PERSON_1>, call me on <PHONE_NUMBER_1>"  -> send this to your LLM
 
 reply = shield.sanitize_output(llm_text, vault).text  # re-scan the model's answer
-shield.restore(reply, vault)                          # real values, for the user or a tool
+shield.restore(reply, vault)  # real values, for the user or a tool
 ```
 
 `sanitize` raises `InputBlockedError` for card numbers and `DetectionError` if detection fails. Both are raised before anything is stored.
@@ -103,7 +105,7 @@ shield.restore(reply, vault)                          # real values, for the use
 
 ```bash
 curl -s localhost:8000/chat -H 'content-type: application/json' \
-  -d '{"message":"Hi, I am dips , email dips@example.com"}'
+  -d '{"message":"Hi, I am Dipak Shanki, email dipak@example.com"}'
 ```
 
 A blocked message (credit card) returns HTTP 200 with `"blocked": true`, since that is the guardrail working, not a server error.
@@ -145,11 +147,11 @@ Results with `en_core_web_md`, threshold 0.4:
 
 Model comparison:
 
-| spaCy model | PERSON precision | PERSON recall | Micro F1 | Errors | 
+| spaCy model | PERSON precision | PERSON recall | Micro F1 | Errors | Image size | Idle RAM |
 |---|---|---|---|---|---|---|
-| `en_core_web_sm` | 1.00 | 0.91 | 0.98 | missed "Prakash Karki" |
-| `en_core_web_md` | 1.00 | 1.00 | 1.00 | none |  |  |
-| `en_core_web_lg` | 0.92 | 1.00 | 0.98 | false positive "mark" 
+| `en_core_web_sm` | 1.00 | 0.91 | 0.98 | missed "Prakash Karki" | [TODO] | [TODO] |
+| `en_core_web_md` | 1.00 | 1.00 | 1.00 | none | [TODO] | [TODO] |
+| `en_core_web_lg` | 0.92 | 1.00 | 0.98 | false positive "mark" | n/a | n/a |
 
 Image size comes from `docker images`, idle RAM from `docker stats --no-stream`. Median latency was 8-10 ms per message (p95 11 ms) for all three models on a laptop CPU, detection only.
 
@@ -157,13 +159,14 @@ Findings:
 
 - Emails, phone numbers and card numbers were detected with exact boundaries by every model.
 - Names are where the models differ, and each difference is a single sentence: `sm` missed one name, `lg` flagged the word "mark" as a person, and `md` made neither error. All three caught the lowercase name "sita sharma".
+- Latency differences between the models are within run-to-run noise, so the model choice rests on memory and image size, not speed. I ship `md`: [TODO: e.g. "it matched lg's results at X MB less"]. An agent turn runs several scans (user input, model messages, tool results).
 - Recall is weighted over precision: a missed span is a leak, a false positive only costs usability.
 
 Known limitations:
 
 - With only 11 name spans, a single miss moves PERSON recall by about 9 points. These numbers show no regressions on a small set, not that detection is perfect.
 - Words that double as first names can produce false positives (`lg` flags "mark" in "Please mark my request as urgent").
-- Only the four types above are scored.
+- Only the four types above are scored. The pipeline also detects [TODO: list per your decision], which affects retrieval quality and is configurable via [TODO].
 - Not evaluated: non-English text, deliberately obfuscated PII ("nine eight five..."), long documents, adversarial input.
 
 ## Project structure
@@ -201,7 +204,7 @@ What it does not guarantee:
 - **Context can still reveal things.** The provider sees the surrounding text, only not the tokenized values.
 - **English only.** The pipeline is configured for English.
 - **Tool code is trusted.** Tools receive real values by design.
-- **No authentication or rate limiting in v0.1.0.** Session ids are unguessable bearer values, but anyone with the URL can call `/chat`. Do not expose a deployment publicly without adding both. 
+- **No authentication or rate limiting in v0.1.0.** Session ids are unguessable bearer values, but anyone with the URL can call `/chat`. Do not expose a deployment publicly without adding both. `[TODO: update if you add rate limiting before tagging]`
 - **`EXPOSE_TOKEN_MAP`** returns real values in responses. It is for demos only and is off by default.
 - **Latency.** Each turn runs NER on the input, on each model message and on tool results.
 - The bundled tools are stubs that show the flow and do not send real email.

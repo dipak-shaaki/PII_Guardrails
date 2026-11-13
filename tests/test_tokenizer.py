@@ -2,7 +2,11 @@ from pii_shield.core.tokenizer import Tokenizer
 from pii_shield.core.vault import TokenVault
 from tests.helpers import StubDetector
 
-KNOWN = {"Dipak": "PERSON", "dipak@example.com": "EMAIL_ADDRESS", "9841657581": "PHONE_NUMBER"}
+KNOWN = {
+    "Dipak": "PERSON",
+    "dipak@example.com": "EMAIL_ADDRESS",
+    "9841657581": "PHONE_NUMBER",
+}
 
 
 def make() -> tuple[Tokenizer, TokenVault]:
@@ -13,7 +17,8 @@ def test_replaces_pii_with_tokens():
     tok, vault = make()
     result = tok.tokenize("I am Dipak, mail dipak@example.com", vault)
     assert result.text == "I am <PERSON_1>, mail <EMAIL_ADDRESS_1>"
-    assert "Dipak" not in result.text and "@" not in result.text
+    assert "Dipak" not in result.text
+    assert "@" not in result.text
 
 
 def test_same_value_reuses_token():

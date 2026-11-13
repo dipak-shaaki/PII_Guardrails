@@ -38,7 +38,7 @@ StoreDep = Annotated[SessionStore, Depends(get_store)]
 SettingsDep = Annotated[Settings, Depends(get_app_settings)]
 
 
-@router.post("/chat", response_model=ChatResponse)
+@router.post("/chat")
 async def chat(
     body: ChatRequest, agent: AgentDep, store: StoreDep, settings: SettingsDep
 ) -> ChatResponse:
@@ -68,7 +68,7 @@ async def chat(
     )
 
 
-@router.get("/sessions/{session_id}", response_model=SessionView)
+@router.get("/sessions/{session_id}")
 async def get_session(
     session_id: str, store: StoreDep, settings: SettingsDep
 ) -> SessionView:
@@ -92,12 +92,12 @@ async def get_session(
     )
 
 
-@router.delete("/sessions/{session_id}", response_model=DeleteResponse)
+@router.delete("/sessions/{session_id}")
 async def delete_session(session_id: str, store: StoreDep) -> DeleteResponse:
     return DeleteResponse(deleted=await store.delete(session_id))
 
 
-@router.get("/health", response_model=HealthResponse)
+@router.get("/health")
 async def health(store: StoreDep, response: Response) -> HealthResponse:
     ok = await store.ping()
     if not ok:

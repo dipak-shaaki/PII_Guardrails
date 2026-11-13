@@ -1,5 +1,7 @@
+import pytest
+
 from pii_shield.core.detector import DetectedEntity
-from pii_shield.evaluation.dataset import parse_example
+from pii_shield.evaluation.dataset import load_dataset, parse_example
 from pii_shield.evaluation.metrics import micro, score
 
 TYPES = ("PERSON", "EMAIL_ADDRESS")
@@ -7,6 +9,11 @@ TYPES = ("PERSON", "EMAIL_ADDRESS")
 
 def ent(etype: str, start: int, end: int, text: str) -> DetectedEntity:
     return DetectedEntity(etype, start, end, 0.9, text[start:end])
+
+
+def test_load_dataset_rejects_paths_outside_cwd(tmp_path):
+    with pytest.raises(ValueError):
+        load_dataset(tmp_path / "dataset.txt")
 
 
 def test_parse_example_computes_exact_spans():
@@ -35,7 +42,8 @@ def test_missed_entity_is_a_false_negative():
     ex = parse_example("I am [[PERSON|Sita]]")
     counts, errors = score([ex], [[]], TYPES)
     assert counts["PERSON"].fn == 1
-    assert errors[0].kind == "missed" and errors[0].value == "Sita"
+    assert errors[0].kind == "missed"
+    assert errors[0].value == "Sita"
 
 
 def test_spurious_entity_is_a_false_positive():
@@ -58,7 +66,8 @@ def test_partial_overlap_passes_lenient_but_fails_strict():
     lenient, _ = score([ex], pred, TYPES)
     strict, _ = score([ex], pred, TYPES, strict=True)
     assert lenient["PERSON"].tp == 1
-    assert strict["PERSON"].tp == 0 and strict["PERSON"].fn == 1
+    assert strict["PERSON"].tp == 0
+    assert strict["PERSON"].fn == 1
 
 
 def test_f1_and_micro_average():
@@ -67,4 +76,5 @@ def test_f1_and_micro_average():
     counts, _ = score([ex], preds, TYPES)
     total = micro(counts)
     assert (total.tp, total.fn) == (1, 1)
-    assert total.recall == 0.5 and total.precision == 1.0
+    assert total.recall == 0.5
+    assert total.precision == 1.0

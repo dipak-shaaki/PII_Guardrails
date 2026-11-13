@@ -65,7 +65,11 @@ def score(
                     errors.append(Error("false_positive", t, example.text, pred.text))
             for gold in unmatched:
                 counts[t].fn += 1
-                errors.append(Error("missed", t, example.text, example.text[gold.start : gold.end]))
+                errors.append(
+                    Error(
+                        "missed", t, example.text, example.text[gold.start : gold.end]
+                    )
+                )
     return counts, errors
 
 
