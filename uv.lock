@@ -1018,6 +1018,9 @@ eval = [
     { name = "en-core-web-md" },
     { name = "en-core-web-sm" },
 ]
+spacy-model = [
+    { name = "en-core-web-lg" },
+]
 
 [package.metadata]
 requires-dist = [
@@ -1048,6 +1051,7 @@ eval = [
     { name = "en-core-web-md", url = "https://github.com/explosion/spacy-models/releases/download/en_core_web_md-3.8.0/en_core_web_md-3.8.0-py3-none-any.whl" },
     { name = "en-core-web-sm", url = "https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl" },
 ]
+spacy-model = [{ name = "en-core-web-lg", url = "https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-3.8.0/en_core_web_lg-3.8.0-py3-none-any.whl" }]
 
 [[package]]
 name = "pluggy"

@@ -45,6 +45,9 @@ eval = [
     "en-core-web-md",
     "en-core-web-sm",
 ]
+spacy-model = [
+    "en-core-web-lg",
+]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

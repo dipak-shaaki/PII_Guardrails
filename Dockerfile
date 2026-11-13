@@ -20,24 +20,19 @@ COPY pyproject.toml uv.lock README.md ./
 RUN uv sync --frozen --no-dev --no-build --no-install-project
 
 # --- Project code and spaCy model -------------------------------------------
-# Copy the source and install the project, then bake in the model Presidio needs
-# at runtime. --no-deps is safe: spaCy and everything else comes from the lock.
+# Copy the source and install the project plus the locked spaCy model.
 COPY src ./src
-ARG SPACY_MODEL=en_core_web_lg
-ARG SPACY_MODEL_VERSION=3.8.0
-# Override at build time: --build-arg SPACY_MODEL=en_core_web_sm
-RUN uv sync --frozen --no-dev --no-build --no-editable \
-    && uv pip install --python /app/.venv/bin/python --no-build --no-deps \
-    "https://github.com/explosion/spacy-models/releases/download/${SPACY_MODEL}-${SPACY_MODEL_VERSION}/${SPACY_MODEL}-${SPACY_MODEL_VERSION}-py3-none-any.whl"
+RUN uv sync --frozen --no-dev --no-build --no-editable --group spacy-model \
+    && useradd --create-home --uid 1000 app \
+    && chown -R app:app /app
 
 # --- Run as a non-root user -------------------------------------------------
-RUN useradd --create-home --uid 1000 app && chown -R app:app /app
 USER app
 
 ENV PATH="/app/.venv/bin:$PATH" \
     PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
-    SPACY_MODEL=${SPACY_MODEL}
+    SPACY_MODEL=en_core_web_lg
 
 EXPOSE 8000
 # One worker on purpose: each worker loads its own spaCy model (RAM).
