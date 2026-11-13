@@ -13,20 +13,19 @@ ENV UV_COMPILE_BYTECODE=1 \
 
 WORKDIR /app
 
-# --- Dependencies -----------------------------------------------------------
+# --- Dependencies and spaCy model -------------------------------------------
 # Copy only the files that define dependencies, then install them. This layer
 # is cached and reused until pyproject.toml or uv.lock actually change.
 COPY pyproject.toml uv.lock README.md ./
-RUN uv sync --frozen --no-dev --no-build --no-install-project
+RUN uv sync --frozen --no-dev --no-build --no-install-project --group spacy-model
 
-# --- Project code and spaCy model -------------------------------------------
-# Copy the source and install the project plus the locked spaCy model.
+# --- Project code -----------------------------------------------------------
+# Run from source; no build step, so no build backend or setup scripts run.
 COPY src ./src
-RUN uv sync --frozen --no-dev --no-build --no-editable --group spacy-model \
-    && useradd --create-home --uid 1000 app \
-    && chown -R app:app /app
+ENV PYTHONPATH=/app/src
 
 # --- Run as a non-root user -------------------------------------------------
+RUN useradd --create-home --uid 1000 app && chown -R app:app /app
 USER app
 
 ENV PATH="/app/.venv/bin:$PATH" \
