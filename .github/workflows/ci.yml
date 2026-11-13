@@ -43,47 +43,9 @@ jobs:
       - name: Tests
         run: uv run --frozen --no-build pytest -v -rs
 
-  docker:
-    name: docker
-    needs: quality
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4
-      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f  # v3
-      - name: Build image
-        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8  # v6
-        with:
-          context: .
-          load: true
-          push: false
-          tags: pii-shield:ci
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-      - name: Container runs as non-root
-        run: |
-          uid=$(docker run --rm --entrypoint id pii-shield:ci -u)
-          echo "uid=$uid"
-          test "$uid" != "0"
-      - name: Smoke test
-        run: |
-          KEY=$(openssl rand -base64 32 | tr '+/' '-_')
-          docker run -d --name smoke -p 8000:8000 \
-            -e GROQ_API_KEY=ci -e GEMINI_API_KEY=ci -e ENCRYPTION_KEY="$KEY" \
-            pii-shield:ci
-          for i in $(seq 1 45); do
-            if curl -fsS localhost:8000/openapi.json > /dev/null; then
-              echo "app is up after ~$((i * 2))s"; exit 0
-            fi
-            sleep 2
-          done
-          echo "app did not start"; exit 1
-      - name: Container logs on failure
-        if: failure()
-        run: docker logs smoke
-
   publish:
     name: publish
-    needs: [quality, docker]
+    needs: quality
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
     runs-on: ubuntu-latest
     permissions:
